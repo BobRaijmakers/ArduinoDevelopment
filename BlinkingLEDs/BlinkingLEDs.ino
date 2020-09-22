@@ -1,32 +1,49 @@
+#include <SoftwareSerial.h>
+
+SoftwareSerial mySerial(6,7);
+
+char data;
+
 void setup() {
-  // put your setup code here, to run once:
+  // Open serial communications and wait for port to open:
+  Serial.begin(115200);
+  while (!Serial) {
+    ; // wait for serial port to connect. Needed for Native USB only
+  }
+  
+  // put your setup code here, to run once:  
   pinMode(3, OUTPUT);
   pinMode(4, OUTPUT);
   pinMode(5, OUTPUT);
   pinMode(9, OUTPUT);
   pinMode(10, OUTPUT);
   pinMode(11, OUTPUT);
-  Serial.begin(9600);
+  mySerial.begin(9600);
+  data = '0';
 }
 
 void loop() {
-  
-  analogWrite(9, random(0 ,255));
-  analogWrite(10, random(0 ,255));
-  analogWrite(11, random(0, 255));
-  
-  int pin = random(3,6);
-  int outputLevel = random(0,2);
-  switch (outputLevel) {
-    case 0:
-      digitalWrite(pin, LOW);
-      break;
-    case 1:
-      digitalWrite(pin, HIGH);
-      break;
+  Serial.print("Loop data: ");
+  Serial.print(data);
+  if(data == '0') {
+    digitalWrite(3, HIGH);
+    digitalWrite(4, LOW);
+    digitalWrite(5, LOW);
+    analogWrite(9, 0);
+    analogWrite(10, 0);
+    analogWrite(11, 0);
+  } else if(data == '1') {
+    digitalWrite(3, LOW);
+    digitalWrite(4, HIGH);
+    digitalWrite(5, HIGH);
+    analogWrite(9, random(0 ,255));
+    analogWrite(10, random(0 ,255));
+    analogWrite(11, random(0, 255));
+    delay(1000);
   }
-
-  int potVal = analogRead(A0);
-  int delayValue = map(potVal, 0, 1023, 10, 1000);
-  delay(delayValue);
+  if(mySerial.available() > 0) {
+    Serial.print("Serial data: ");
+    data = mySerial.read();
+  }
+  Serial.println("End loop");
 }
